@@ -39,6 +39,12 @@ const routes = [
         meta: { title: '律师列表' }
       },
       {
+        path: 'match',
+        name: 'DemandMatch',
+        component: () => import('@/views/match/index.vue'),
+        meta: { title: '需求智能匹配' }
+      },
+      {
         path: 'lawyer/detail/:id',
         name: 'LawyerDetail',
         component: () => import('@/views/lawyer/detail.vue'),

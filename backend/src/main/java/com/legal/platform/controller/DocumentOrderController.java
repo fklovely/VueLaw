@@ -22,9 +22,11 @@ import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/document-order")
@@ -41,6 +43,27 @@ public class DocumentOrderController {
 
     @Autowired
     private IncomeRecordMapper incomeRecordMapper;
+
+    private Set<Long> getPossibleDocumentLawyerIds(Long userId) {
+        Set<Long> lawyerIds = new HashSet<>();
+        if (userId == null) {
+            return lawyerIds;
+        }
+        lawyerIds.add(userId);
+
+        LambdaQueryWrapper<LawyerInfo> lawyerWrapper = new LambdaQueryWrapper<>();
+        lawyerWrapper.eq(LawyerInfo::getUserId, userId);
+        LawyerInfo lawyer = lawyerInfoMapper.selectOne(lawyerWrapper);
+        if (lawyer != null) {
+            if (lawyer.getId() != null) {
+                lawyerIds.add(lawyer.getId());
+            }
+            if (lawyer.getUserId() != null) {
+                lawyerIds.add(lawyer.getUserId());
+            }
+        }
+        return lawyerIds;
+    }
 
     /*@GetMapping("/list")
     public Result<PageResult<DocumentOrder>> list(
@@ -93,12 +116,12 @@ public class DocumentOrderController {
                 return Result.success(new PageResult<>(new ArrayList<>(), 0L));
             }
 
-            Long lawyerId = lawyer.getId(); // 这才是 document_order.lawyer_id
-            System.out.println("律师信息表ID (lawyer_info.id): " + lawyerId);
+            Set<Long> lawyerIds = getPossibleDocumentLawyerIds(userId);
+            System.out.println("文书订单可匹配律师ID: " + lawyerIds);
 
             // 查询文书订单
             LambdaQueryWrapper<DocumentOrder> wrapper = new LambdaQueryWrapper<>();
-            wrapper.eq(DocumentOrder::getLawyerId, lawyerId);
+            wrapper.in(DocumentOrder::getLawyerId, lawyerIds);
 
             if (orderType != null) {
                 wrapper.eq(DocumentOrder::getOrderType, orderType);
@@ -210,10 +233,10 @@ public class DocumentOrderController {
 
     @GetMapping("/statistics")
     public Result<Map<String, Object>> statistics(HttpServletRequest request) {
-        Long lawyerId = (Long) request.getAttribute("userId");
+        Long userId = (Long) request.getAttribute("userId");
         
         LambdaQueryWrapper<DocumentOrder> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(DocumentOrder::getLawyerId, lawyerId);
+        wrapper.in(DocumentOrder::getLawyerId, getPossibleDocumentLawyerIds(userId));
         
         List<DocumentOrder> allOrders = documentOrderMapper.selectList(wrapper);
         

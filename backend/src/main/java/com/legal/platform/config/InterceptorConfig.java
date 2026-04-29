@@ -23,6 +23,7 @@ public class InterceptorConfig implements WebMvcConfigurer {
                         "/upload/**",
                         "/uploads/**",
                         "/lawyer/list",
+                        "/lawyer/intelligent-match",
                         "/lawyer/detail/**",
                         "/article/list",
                         "/article/detail/**",

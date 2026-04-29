@@ -9,6 +9,7 @@
         <nav class="nav-menu">
           <router-link to="/home" class="nav-item" :class="{ active: $route.path === '/home' }">首页</router-link>
           <router-link to="/lawyer" class="nav-item" :class="{ active: $route.path.startsWith('/lawyer') }">找律师</router-link>
+          <router-link to="/match" class="nav-item" :class="{ active: $route.path.startsWith('/match') }">智能匹配</router-link>
           <router-link to="/consult" class="nav-item" :class="{ active: $route.path.startsWith('/consult') }">法律咨询</router-link>
           <router-link to="/document" class="nav-item" :class="{ active: $route.path === '/document' }">法律文书</router-link>
           <router-link to="/case" class="nav-item" :class="{ active: $route.path.startsWith('/case') }">案例检索</router-link>
@@ -58,6 +59,7 @@
         <div class="footer-links">
           <router-link to="/home">首页</router-link>
           <router-link to="/lawyer">找律师</router-link>
+          <router-link to="/match">智能匹配</router-link>
           <router-link to="/case">案例检索</router-link>
           <router-link to="/regulation">法规查询</router-link>
           <router-link to="/article">普法文章</router-link>
@@ -167,6 +169,7 @@ export default {
     display: flex;
     align-items: center;
     cursor: pointer;
+    flex-shrink: 0;
     
     i {
       font-size: 28px;
@@ -185,14 +188,19 @@ export default {
   .nav-menu {
     display: flex;
     align-items: center;
+    flex: 1;
+    justify-content: center;
+    margin: 0 16px;
+    overflow-x: auto;
     
     .nav-item {
-      padding: 0 12px;
+      padding: 0 8px;
       color: #666;
       font-size: 14px;
       cursor: pointer;
       transition: color 0.3s;
       white-space: nowrap;
+      flex-shrink: 0;
       
       &:hover, &.active {
         color: #1890ff;
@@ -203,6 +211,7 @@ export default {
   .user-area {
     display: flex;
     align-items: center;
+    flex-shrink: 0;
     
     .chat-badge {
       margin-right: 16px;

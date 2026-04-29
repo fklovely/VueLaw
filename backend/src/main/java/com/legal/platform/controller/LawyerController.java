@@ -27,6 +27,16 @@ public class LawyerController {
         return Result.success(lawyerInfoService.getLawyerList(page, size, keyword, expertise, status));
     }
 
+    @PostMapping("/intelligent-match")
+    public Result<Map<String, Object>> intelligentMatch(@RequestBody(required = false) Map<String, Object> params) {
+        String description = params == null || params.get("description") == null ? null : params.get("description").toString();
+        Integer limit = null;
+        if (params != null && params.get("limit") != null) {
+            limit = Integer.parseInt(params.get("limit").toString());
+        }
+        return lawyerInfoService.intelligentMatch(description, limit);
+    }
+
     @GetMapping("/detail/{id}")
     public Result<LawyerInfo> getLawyerDetail(@PathVariable Long id) {
         return lawyerInfoService.getLawyerDetail(id);

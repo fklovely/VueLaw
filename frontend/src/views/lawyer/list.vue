@@ -6,9 +6,12 @@
     </div>
     
     <div class="search-box">
-      <el-input v-model="keyword" placeholder="搜索律师姓名、律所" class="search-input" @keyup.enter.native="handleSearch">
-        <el-button slot="append" icon="el-icon-search" @click="handleSearch"></el-button>
-      </el-input>
+      <div class="search-row">
+        <el-input v-model="keyword" placeholder="搜索律师姓名、律所" class="search-input" @keyup.enter.native="handleSearch">
+          <el-button slot="append" icon="el-icon-search" @click="handleSearch"></el-button>
+        </el-input>
+        <el-button type="primary" icon="el-icon-magic-stick" @click="$router.push('/match')">智能匹配</el-button>
+      </div>
       <div class="filter-tags">
         <span class="label">擅长领域：</span>
         <el-tag v-for="item in expertiseOptions" :key="item" :effect="expertise === item ? 'dark' : 'plain'" @click="expertise = item === expertise ? '' : item">{{ item }}</el-tag>
@@ -66,13 +69,14 @@ export default {
   data() {
     return {
       defaultAvatar: 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png',
-      keyword: '',
-      expertise: '',
+      keyword: this.$route.query.keyword || '',
+      expertise: this.$route.query.expertise || '',
       expertiseOptions: ['未成年人监护权', '校园欺凌', '家庭暴力', '离婚纠纷', '财产继承', '刑事辩护'],
       lawyerList: [],
       total: 0,
       currentPage: 1,
-      pageSize: 12
+      pageSize: 12,
+      syncingQuery: false
     }
   },
   created() {
@@ -113,7 +117,20 @@ export default {
   },
   watch: {
     expertise() {
-      this.handleSearch()
+      if (!this.syncingQuery) {
+        this.handleSearch()
+      }
+    },
+    '$route.query'(query) {
+      const nextKeyword = query.keyword || ''
+      const nextExpertise = query.expertise || ''
+      if (nextKeyword !== this.keyword || nextExpertise !== this.expertise) {
+        this.syncingQuery = true
+        this.keyword = nextKeyword
+        this.expertise = nextExpertise
+        this.syncingQuery = false
+        this.handleSearch()
+      }
     }
   }
 }
@@ -144,8 +161,18 @@ export default {
     max-width: 800px;
     margin: 0 auto 30px;
     
-    .search-input {
+    .search-row {
+      display: flex;
+      gap: 12px;
       margin-bottom: 15px;
+      
+      .el-button {
+        flex-shrink: 0;
+      }
+    }
+    
+    .search-input {
+      flex: 1;
     }
     
     .filter-tags {
@@ -273,6 +300,28 @@ export default {
   .pagination {
     text-align: center;
     margin-top: 30px;
+  }
+}
+
+@media (max-width: 960px) {
+  .lawyer-list-page {
+    .lawyer-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+}
+
+@media (max-width: 640px) {
+  .lawyer-list-page {
+    .search-box {
+      .search-row {
+        flex-direction: column;
+      }
+    }
+
+    .lawyer-grid {
+      grid-template-columns: 1fr;
+    }
   }
 }
 </style>

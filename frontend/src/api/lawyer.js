@@ -8,6 +8,14 @@ export function getLawyerList(params) {
   })
 }
 
+export function intelligentMatch(data) {
+  return request({
+    url: '/lawyer/intelligent-match',
+    method: 'post',
+    data
+  })
+}
+
 export function getLawyerDetail(id) {
   return request({
     url: `/lawyer/detail/${id}`,

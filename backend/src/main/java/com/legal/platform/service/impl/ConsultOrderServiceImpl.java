@@ -23,9 +23,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Service
 public class ConsultOrderServiceImpl extends ServiceImpl<ConsultOrderMapper, ConsultOrder> implements ConsultOrderService {
@@ -55,6 +57,37 @@ public class ConsultOrderServiceImpl extends ServiceImpl<ConsultOrderMapper, Con
         return lawyerInfoMapper.selectById(lawyerId);
     }
 
+    private Set<Long> getPossibleLawyerIds(Long lawyerId) {
+        Set<Long> lawyerIds = new HashSet<>();
+        if (lawyerId == null) {
+            return lawyerIds;
+        }
+        lawyerIds.add(lawyerId);
+
+        LambdaQueryWrapper<LawyerInfo> userWrapper = new LambdaQueryWrapper<>();
+        userWrapper.eq(LawyerInfo::getUserId, lawyerId);
+        LawyerInfo lawyerByUserId = lawyerInfoMapper.selectOne(userWrapper);
+        if (lawyerByUserId != null) {
+            if (lawyerByUserId.getId() != null) {
+                lawyerIds.add(lawyerByUserId.getId());
+            }
+            if (lawyerByUserId.getUserId() != null) {
+                lawyerIds.add(lawyerByUserId.getUserId());
+            }
+        }
+
+        LawyerInfo lawyerById = lawyerInfoMapper.selectById(lawyerId);
+        if (lawyerById != null) {
+            if (lawyerById.getId() != null) {
+                lawyerIds.add(lawyerById.getId());
+            }
+            if (lawyerById.getUserId() != null) {
+                lawyerIds.add(lawyerById.getUserId());
+            }
+        }
+        return lawyerIds;
+    }
+
     @Override
     public PageResult<ConsultOrder> getOrderList(Integer page, Integer size, Long userId, Long lawyerId, Integer status, Integer consultType) {
         LambdaQueryWrapper<ConsultOrder> wrapper = new LambdaQueryWrapper<>();
@@ -62,7 +95,8 @@ public class ConsultOrderServiceImpl extends ServiceImpl<ConsultOrderMapper, Con
             wrapper.eq(ConsultOrder::getUserId, userId);
         }
         if (lawyerId != null) {
-            wrapper.eq(ConsultOrder::getLawyerId, lawyerId);
+            Set<Long> lawyerIds = getPossibleLawyerIds(lawyerId);
+            wrapper.in(ConsultOrder::getLawyerId, lawyerIds);
         }
         if (status != null) {
             wrapper.eq(ConsultOrder::getStatus, status);

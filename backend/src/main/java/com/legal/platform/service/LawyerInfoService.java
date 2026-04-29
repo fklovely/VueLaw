@@ -17,4 +17,5 @@ public interface LawyerInfoService extends IService<LawyerInfo> {
     Result<Map<String, Object>> getLawyerStatistics(Long lawyerId);
     Result<Map<String, Object>> getAuditStatus(Long userId);
     Result<Boolean> resubmitAudit(Long userId, Map<String, Object> data);
+    Result<Map<String, Object>> intelligentMatch(String description, Integer limit);
 }

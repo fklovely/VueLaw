@@ -95,10 +95,11 @@ export default {
         { id: 3, title: '法律文书服务', desc: '专业文书定制，保障您的权益', image: 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80', link: '/document' }
       ],
       services: [
-        { id: 1, title: '法律咨询', desc: '图文咨询，专业律师在线解答', icon: 'el-icon-chat-dot-round', link: '/lawyer' },
-        { id: 2, title: '法律文书', desc: '文书模板下载、定制代写、审核校对', icon: 'el-icon-document', link: '/document' },
-        { id: 3, title: '案例检索', desc: '海量案例数据库，快速检索参考', icon: 'el-icon-search', link: '/case' },
-        { id: 4, title: '法规查询', desc: '最新法律法规，条文解读', icon: 'el-icon-reading', link: '/regulation' }
+        { id: 1, title: '需求智能匹配', desc: '描述问题，推荐对应领域律师', icon: 'el-icon-magic-stick', link: '/match' },
+        { id: 2, title: '法律咨询', desc: '图文咨询，专业律师在线解答', icon: 'el-icon-chat-dot-round', link: '/lawyer' },
+        { id: 3, title: '法律文书', desc: '文书模板下载、定制代写、审核校对', icon: 'el-icon-document', link: '/document' },
+        { id: 4, title: '案例检索', desc: '海量案例数据库，快速检索参考', icon: 'el-icon-search', link: '/case' },
+        { id: 5, title: '法规查询', desc: '最新法律法规，条文解读', icon: 'el-icon-reading', link: '/regulation' }
       ],
       lawyers: [],
       articles: []
@@ -200,8 +201,8 @@ export default {
     margin: 0 auto;
     padding: 0 20px 40px;
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 30px;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 20px;
   }
   
   .service-item {
