@@ -51,6 +51,8 @@ public class OrderProgressController {
     @Autowired
     private SysUserMapper sysUserMapper;
 
+    private volatile boolean progressTableAvailable = true;
+
     @GetMapping("/list")
     public Result<List<Map<String, Object>>> list(HttpServletRequest request) {
         Long userId = (Long) request.getAttribute("userId");
@@ -133,19 +135,30 @@ public class OrderProgressController {
             return permissionResult;
         }
 
-        OrderProgress orderProgress = getProgressRecord(orderType, orderId);
-        if (orderProgress == null) {
-            orderProgress = new OrderProgress();
-            orderProgress.setOrderType(orderType);
-            orderProgress.setOrderId(orderId);
-            orderProgress.setProgress(progress);
-            orderProgress.setRemark(remark);
-            orderProgressMapper.insert(orderProgress);
-        } else {
-            orderProgress.setProgress(progress);
-            orderProgress.setRemark(remark);
-            orderProgress.setUpdateTime(LocalDateTime.now());
-            orderProgressMapper.updateById(orderProgress);
+        try {
+            OrderProgress orderProgress = getProgressRecord(orderType, orderId);
+            if (!progressTableAvailable) {
+                return Result.error("数据库缺少订单进度表，请先执行 database/migrations/20260429_add_order_progress.sql 后重启后端");
+            }
+            if (orderProgress == null) {
+                orderProgress = new OrderProgress();
+                orderProgress.setOrderType(orderType);
+                orderProgress.setOrderId(orderId);
+                orderProgress.setProgress(progress);
+                orderProgress.setRemark(remark);
+                orderProgressMapper.insert(orderProgress);
+            } else {
+                orderProgress.setProgress(progress);
+                orderProgress.setRemark(remark);
+                orderProgress.setUpdateTime(LocalDateTime.now());
+                orderProgressMapper.updateById(orderProgress);
+            }
+        } catch (RuntimeException e) {
+            if (isMissingProgressTable(e)) {
+                progressTableAvailable = false;
+                return Result.error("数据库缺少订单进度表，请先执行 database/migrations/20260429_add_order_progress.sql 后重启后端");
+            }
+            throw e;
         }
 
         return Result.success("进度更新成功", true);
@@ -257,11 +270,41 @@ public class OrderProgressController {
     }
 
     private OrderProgress getProgressRecord(Integer orderType, Long orderId) {
+        if (!progressTableAvailable) {
+            return null;
+        }
         LambdaQueryWrapper<OrderProgress> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(OrderProgress::getOrderType, orderType)
                 .eq(OrderProgress::getOrderId, orderId)
                 .last("LIMIT 1");
-        return orderProgressMapper.selectOne(wrapper);
+        try {
+            return orderProgressMapper.selectOne(wrapper);
+        } catch (RuntimeException e) {
+            if (isMissingProgressTable(e)) {
+                progressTableAvailable = false;
+                return null;
+            }
+            throw e;
+        }
+    }
+
+    private boolean isMissingProgressTable(RuntimeException e) {
+        Throwable current = e;
+        while (current != null) {
+            String message = current.getMessage();
+            if (message != null) {
+                String normalized = message.toLowerCase();
+                if (normalized.contains("order_progress")
+                        && (normalized.contains("doesn't exist")
+                        || normalized.contains("does not exist")
+                        || normalized.contains("base table or view not found")
+                        || normalized.contains("不存在"))) {
+                    return true;
+                }
+            }
+            current = current.getCause();
+        }
+        return false;
     }
 
     private String getClientName(Long userId) {
