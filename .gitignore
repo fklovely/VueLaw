@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+frontend/node_modules/
+
+# Build output
+target/
+backend/target/
+dist/
+frontend/dist/
+
+# Runtime uploads and generated files
+uploads/
+backend/uploads/
+logs/
+*.log
+
+# Local configuration and secrets
+.env
+.env.*
+application.yml
+application.yaml
+application.properties
+backend/src/main/resources/application.yml
+backend/src/main/resources/application.yaml
+backend/src/main/resources/application.properties
+
+# Local database dumps with seed/user data
+legal_platform.sql
+
+# IDE and OS files
+.idea/
+*.iml
+.vscode/
+.DS_Store
+Thumbs.db
